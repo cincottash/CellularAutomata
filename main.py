@@ -25,6 +25,7 @@ def displayGrid(canvas):
                 canvas.set_at((pixelX, pixelY), (0,0,0))
             else:
                 canvas.set_at((pixelX, pixelY), (255,255,255))
+    pg.display.update()
 
 #sets all the pixels to white
 def initializeBackground(canvas):
@@ -52,7 +53,7 @@ def initializeCells(canvas):
                     for pixelY in range(yStart, yStart+blockSize):
                         canvas.set_at((pixelX,pixelY), (0,0,0))
 
-        pg.display.update()
+            pg.display.update()
 
 def main():
     canvas, clock, fps = setup()
@@ -61,31 +62,30 @@ def main():
 
     done = False
 
-    runCount = 0
+    loopCount = 0
 
     while(not done):
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 done = True
             else:
-
-                print('initializing background\n')
-                initializeBackground(canvas)
-
+                #only initialize the cells after we first drew all the background shit
+                if loopCount == 0:
+                    print('initializing background\n')
+                    initializeBackground(canvas)
+                    
                 displayGrid(canvas)
 
-
-                #only initialize the cells after we first drew all the background shit
-                if runCount == 1:
+                if loopCount == 1:
+                    print('initializing Cells')
                     initializeCells(canvas)
-
 
                 print('Displaying update\n')
                     
-                clock.tick(fps)
                 pg.display.update()
-
-                runCount += 1
+                clock.tick(fps)
+            
+            loopCount += 1
                 
 
 if __name__ == '__main__':
