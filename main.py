@@ -21,7 +21,6 @@ These rules, which compare the behavior of the automaton to real life, can be co
 def displayGrid(canvas):
     for pixelX in range(canvas.get_width()):
         for pixelY in range(canvas.get_height()):
-            #print(canvas.get_at((pixelX, pixelY)))
             if pixelX % (canvas.get_width()/10) == 0 or pixelY % (canvas.get_height()/10) == 0:
                 canvas.set_at((pixelX, pixelY), (0,0,0))
             else:
@@ -32,6 +31,29 @@ def initializeBackground(canvas):
     for pixelX in range(canvas.get_width()):
         for pixelY in range(canvas.get_height()):
             canvas.set_at((pixelX, pixelY), (0,0,0))
+
+def initializeCells(canvas):
+    done = False
+
+    blockSize = int(canvas.get_width()/10)
+
+    while(not done):
+        for event in pg.event.get():
+            if event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
+                done = True
+            elif pg.mouse.get_pressed()[0]:
+                coords = pg.mouse.get_pos()
+                print(coords)
+                xStart = coords[0]//blockSize * blockSize
+                yStart = coords[1]//blockSize * blockSize
+
+
+                for pixelX in range(xStart, xStart+blockSize):
+                    for pixelY in range(yStart, yStart+blockSize):
+                        canvas.set_at((pixelX,pixelY), (0,0,0))
+
+        pg.display.update()
+
 def main():
     canvas, clock, fps = setup()
 
@@ -39,28 +61,31 @@ def main():
 
     done = False
 
-    firstRun = True
+    runCount = 0
 
     while(not done):
         for event in pg.event.get():
-            if event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
-                done = True
-            elif event.type == pg.QUIT:
+            if event.type == pg.QUIT:
                 done = True
             else:
 
-                print('Blitting background\n')
-
-                if firstRun:
-                    initializeBackground(canvas)
+                print('initializing background\n')
+                initializeBackground(canvas)
 
                 displayGrid(canvas)
 
-                print('Displaying update\n')
 
-                pg.display.update()
-                
+                #only initialize the cells after we first drew all the background shit
+                if runCount == 1:
+                    initializeCells(canvas)
+
+
+                print('Displaying update\n')
+                    
                 clock.tick(fps)
+                pg.display.update()
+
+                runCount += 1
                 
 
 if __name__ == '__main__':
