@@ -1,11 +1,13 @@
 import pygame as pg
 
 def setup():
-	#pygame.init()
 
-	canvasWidth = 1920
-	canvasHeight = 1080
+    clock = pg.time.Clock()
 
-	clock = pg.time.Clock()
+    fps = 30
 
-	return canvasWidth, canvasHeight, clock
+    background = pg.image.load('assets/whiteBackground.png')
+    
+    canvas = pg.display.set_mode((background.get_width(), background.get_height()))
+
+    return canvas, background,clock, fps
