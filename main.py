@@ -37,22 +37,45 @@ def initializeCells(canvas):
 
     blockSize = int(canvas.get_width()/10)
 
+    cellList = []
+
+    for xStart in range(0,canvas.get_width(), blockSize):
+        for yStart in range(0, canvas.get_height(), blockSize):
+            cellList.append(Cell(xStart, yStart, blockSize, False))
+
     while(not done):
         for event in pg.event.get():
             if event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
                 done = True
             elif pg.mouse.get_pressed()[0]:
                 coords = pg.mouse.get_pos()
-                print(coords)
                 xStart = coords[0]//blockSize * blockSize
                 yStart = coords[1]//blockSize * blockSize
 
+                #cellListIndex = [index for (index, cell) in enumerate(cellList) if (cell.xStart == xStart and cell.yStart = yStart)]
+                for index, cell in enumerate(cellList):
+                    if cell.xStart == xStart and cell.yStart == yStart:
+                        cellList[index].isAlive = True
+                        print(index)
+                        break
 
                 for pixelX in range(xStart, xStart+blockSize):
                     for pixelY in range(yStart, yStart+blockSize):
                         canvas.set_at((pixelX,pixelY), (0,0,0))
 
             pg.display.update()
+
+    return cellList
+
+def displayCells(canvas, cellList):
+    print('Updating cells\n')
+    for cell in cellList:
+        if cell.isAlive:
+            for pixelX in range(cell.xStart, cell.xStart+cell.size):
+                for pixelY in range(cell.yStart, cell.yStart+cell.size):
+                    canvas.set_at((pixelX, pixelY), (0, 0, 0))
+    pg.display.update()
+
 
 def main():
     canvas, clock, fps = setup()
@@ -61,7 +84,7 @@ def main():
 
     done = False
 
-    loopCount = 0
+    firstRun = True
 
     while(not done):
         for event in pg.event.get():
@@ -69,22 +92,22 @@ def main():
                 done = True
             else:
                 #only initialize the cells after we first drew all the background shit
-                if loopCount == 0:
+                if firstRun:
                     print('initializing background\n')
                     initializeBackground(canvas)
                     
                 displayGrid(canvas)
 
-                if loopCount == 0:
+                if firstRun:
                     print('initializing Cells')
-                    initializeCells(canvas)
+                    cellList = initializeCells(canvas)
 
-                print('Displaying update\n')
-                    
-                pg.display.update()
+                displayCells(canvas, cellList)
+
                 clock.tick(fps)
+
+                firstRun = False
             
-            loopCount += 1
                 
 
 if __name__ == '__main__':

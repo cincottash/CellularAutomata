@@ -5,7 +5,7 @@ def setup():
 
     clock = pg.time.Clock()
 
-    fps = 30
+    fps = 60
     
     width = height = int(sys.argv[1])
     
