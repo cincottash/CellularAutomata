@@ -76,6 +76,12 @@ def displayCells(canvas, cellList):
                     canvas.set_at((pixelX, pixelY), (0, 0, 0))
     pg.display.update()
 
+def updateCells(canvas, CellList):
+    
+
+
+    return cellList
+
 
 def main():
     canvas, clock, fps = setup()
@@ -101,6 +107,8 @@ def main():
                 if firstRun:
                     print('initializing Cells')
                     cellList = initializeCells(canvas)
+
+                cellList = updateCells(canvas, cellList)
 
                 displayCells(canvas, cellList)
 
