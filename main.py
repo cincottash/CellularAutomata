@@ -23,15 +23,14 @@ def displayGrid(canvas):
         for pixelY in range(canvas.get_height()):
             if pixelX % (canvas.get_width()/10) == 0 or pixelY % (canvas.get_height()/10) == 0:
                 canvas.set_at((pixelX, pixelY), (0,0,0))
-            else:
-                canvas.set_at((pixelX, pixelY), (255,255,255))
+
     pg.display.update()
 
 #sets all the pixels to white
 def initializeBackground(canvas):
     for pixelX in range(canvas.get_width()):
         for pixelY in range(canvas.get_height()):
-            canvas.set_at((pixelX, pixelY), (0,0,0))
+            canvas.set_at((pixelX, pixelY), (255,255,255))
 
 def initializeCells(canvas):
     done = False
@@ -76,7 +75,7 @@ def main():
                     
                 displayGrid(canvas)
 
-                if loopCount == 1:
+                if loopCount == 0:
                     print('initializing Cells')
                     initializeCells(canvas)
 
