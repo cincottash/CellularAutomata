@@ -52,7 +52,6 @@ def initializeCells(canvas):
                 xStart = coords[0]//blockSize * blockSize
                 yStart = coords[1]//blockSize * blockSize
 
-                #cellListIndex = [index for (index, cell) in enumerate(cellList) if (cell.xStart == xStart and cell.yStart = yStart)]
                 for index, cell in enumerate(cellList):
                     if cell.xStart == xStart and cell.yStart == yStart:
                         cellList[index].isAlive = True
@@ -76,9 +75,7 @@ def displayCells(canvas, cellList):
                     canvas.set_at((pixelX, pixelY), (0, 0, 0))
     pg.display.update()
 
-def updateCells(canvas, CellList):
-    
-
+def updateCells(canvas, cellList):
 
     return cellList
 
@@ -96,6 +93,8 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 done = True
+            elif event.type == pg.KEYDOWN and event.key == pg.K_q:
+                done=True
             else:
                 #only initialize the cells after we first drew all the background shit
                 if firstRun:
