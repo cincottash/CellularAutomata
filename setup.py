@@ -11,4 +11,6 @@ def setup():
     
     canvas = pg.display.set_mode((width, height))
 
-    return canvas, clock, fps
+    cellSize = int(width/30)
+
+    return canvas, clock, fps, cellSize

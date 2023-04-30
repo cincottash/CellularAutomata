@@ -19,10 +19,10 @@ These rules, which compare the behavior of the automaton to real life, can be co
 '''
 
 #make a grid over the background and display it to the screen
-def displayGrid(canvas):
+def displayGrid(canvas, cellSize):
     for pixelX in range(canvas.get_width()):
         for pixelY in range(canvas.get_height()):
-            if pixelX % (canvas.get_width()/10) == 0 or pixelY % (canvas.get_height()/10) == 0:
+            if pixelX % cellSize == 0 or pixelY % cellSize == 0:
                 canvas.set_at((pixelX, pixelY), (0,0,0))
 
     pg.display.update()
@@ -33,13 +33,11 @@ def initializeBackground(canvas):
         for pixelY in range(canvas.get_height()):
             canvas.set_at((pixelX, pixelY), (255,255,255))
 
-def initializeCells(canvas):
-    done = False
+#allow user to set the starting cells
+def initializeCells(canvas, cellSize):
+    done = False    
 
-    #each cell is a square
-    cellSize = int(canvas.get_width()/10)
-
-    #list of cell objects which store the state (isAlive) as well as sizes and coordinate stuff
+    #list of cell objects which store the state (isAlive) as well as sizes and coordinates
     cellList = []
 
     #add all the cells to the list starting as dead cells
@@ -65,7 +63,6 @@ def initializeCells(canvas):
                 for index, cell in enumerate(cellList):
                     if cell.xStart == xStart and cell.yStart == yStart:
                         cellList[index].isAlive = True
-                        print(index)
                         break
 
                 #make that cell black
@@ -85,17 +82,100 @@ def displayCells(canvas, cellList):
             for pixelX in range(cell.xStart, cell.xStart+cell.size):
                 for pixelY in range(cell.yStart, cell.yStart+cell.size):
                     canvas.set_at((pixelX, pixelY), (0, 0, 0))
+        else:
+            for pixelX in range(cell.xStart, cell.xStart+cell.size):
+                for pixelY in range(cell.yStart, cell.yStart+cell.size):
+                    canvas.set_at((pixelX, pixelY), (255, 255, 255))
     pg.display.update()
 
 #apply the rules of the game to the cells
 def updateCells(canvas, cellList):
 
-    print('Updating cells\n')
+    #Any live cell with two or three live neighbours survives.
+    #Any dead cell with three live neighbours becomes a live cell.
+    #All other live cells die in the next generation. Similarly, all other dead cells stay dead.
 
-    return cellList
+    #find all the neighbors of this cell
+    newCellList = []
+    for cell in cellList:
+        topLeftNeighborIndex = None
+        topRightNeighborIndex = None
+        bottomLeftNeighborIndex = None
+        bottomRightNeighborIndex = None
+
+        leftNeighborIndex = None
+        rightNeighborIndex = None
+        topNeighborIndex = None
+        bottomNeighborIndex = None
+
+        #TODO consider the diagnols
+        #whether the cell is dead or alive we will need to find all neighbors, best to do this now, get that shit over with ya feel?
+        for index, otherCell in enumerate(cellList):
+            #left neighbor
+            if  otherCell.xStart == cell.xStart - cell.size and otherCell.yStart == cell.yStart:
+                leftNeighborIndex = index
+            #right neighbor
+            if  otherCell.xStart == cell.xStart + cell.size and otherCell.yStart == cell.yStart:
+                rightNeighborIndex = index
+            #top neighbor
+            if otherCell.xStart == cell.xStart and otherCell.yStart == cell.yStart - cell.size:
+                topNeighborIndex = index
+            #bottom neighbor
+            if otherCell.xStart == cell.xStart and otherCell.yStart == cell.yStart + cell.size:
+                bottomNeighborIndex = index
+            #top left neighbor
+            if otherCell.xStart == cell.xStart - cell.size and otherCell.yStart == cell.yStart - cell.size:
+                topLeftNeighborIndex = index
+            #top right neighbor
+            if otherCell.xStart == cell.xStart + cell.size and otherCell.yStart == cell.yStart - cell.size:
+                topRightNeighborIndex = index
+            #bottom right neighbor
+            if otherCell.xStart == cell.xStart + cell.size and otherCell.yStart == cell.yStart + cell.size:
+                bottomRightNeighborIndex = index
+            #bottom left neighbor
+            if otherCell.xStart == cell.xStart - cell.size and otherCell.yStart == cell.yStart + cell.size:
+                bottomLeftNeighborIndex = index
+        #check all neighbors if there is no neighbor the index is None
+        liveNeighborCount = 0
+
+        if leftNeighborIndex != None and cellList[leftNeighborIndex].isAlive:
+            liveNeighborCount += 1
+        if rightNeighborIndex != None and cellList[rightNeighborIndex].isAlive:
+            liveNeighborCount += 1
+        if topNeighborIndex != None and cellList[topNeighborIndex].isAlive:
+            liveNeighborCount += 1
+        if bottomNeighborIndex != None and cellList[bottomNeighborIndex].isAlive:
+            liveNeighborCount += 1
+
+        if topLeftNeighborIndex != None and cellList[topLeftNeighborIndex].isAlive:
+            liveNeighborCount += 1
+        if bottomLeftNeighborIndex != None and cellList[bottomLeftNeighborIndex].isAlive:
+            liveNeighborCount += 1
+        if topRightNeighborIndex != None and cellList[topRightNeighborIndex].isAlive:
+            liveNeighborCount += 1
+        if bottomRightNeighborIndex != None and cellList[bottomRightNeighborIndex].isAlive:
+            liveNeighborCount += 1
+
+        #Any live cell with two or three live neighbours survives, All other live cells die in the next generation
+        if cell.isAlive:
+            if liveNeighborCount == 2 or liveNeighborCount == 3:
+                newCellList.append(Cell(cell.xStart, cell.yStart, cell.size, True))
+            else:
+                newCellList.append(Cell(cell.xStart, cell.yStart, cell.size, False))
+
+        #cell is dead
+        else:
+            #Any dead cell with three live neighbours becomes a live cell.
+            if liveNeighborCount == 3:
+                newCellList.append(Cell(cell.xStart, cell.yStart, cell.size, True))
+            else:
+                newCellList.append(Cell(cell.xStart, cell.yStart, cell.size, False))
+        print('Updating cells\n')
+
+    return newCellList
 
 def main():
-    canvas, clock, fps = setup()
+    canvas, clock, fps, cellSize = setup()
 
     print('Starting simulation\n')
 
@@ -116,15 +196,16 @@ def main():
                     initializeBackground(canvas)
                     
                 #make a grid over the background and display it to the screen
-                displayGrid(canvas)
+                displayGrid(canvas, cellSize)
 
                 if firstRun:
                     print('initializing Cells')
                     #allow user to set the starting cells
-                    cellList = initializeCells(canvas)
+                    cellList = initializeCells(canvas, cellSize)
 
-                #apply the rules of the game to the cells
-                cellList = updateCells(canvas, cellList)
+                #apply the rules of the game to the cells atfer we do all our initialization, maybe I can delete this if statement, gotta test it out
+                if not firstRun:
+                    cellList = updateCells(canvas, cellList)
 
                 #draw cells to the screen according to it's size and state
                 displayCells(canvas, cellList)
